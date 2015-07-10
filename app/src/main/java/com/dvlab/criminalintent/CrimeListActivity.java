@@ -1,12 +1,10 @@
 package com.dvlab.criminalintent;
 
-
 import android.app.Fragment;
 
-public class CrimeActivity extends SingleFragmentActivity {
-
+public class CrimeListActivity extends SingleFragmentActivity {
     @Override
     protected Fragment createFragment() {
-        return new CrimeFragment();
+        return new CrimeListFragment();
     }
 }
