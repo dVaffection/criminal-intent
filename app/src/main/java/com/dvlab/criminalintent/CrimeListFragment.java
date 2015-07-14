@@ -1,16 +1,15 @@
 package com.dvlab.criminalintent;
 
 import android.app.ListFragment;
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.CheckBox;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -35,7 +34,10 @@ public class CrimeListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Crime crime = (Crime) getListAdapter().getItem(position);
-        Toast.makeText(getActivity(), crime.getTitle(), Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(getActivity(), CrimeActivity.class);
+        intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
+        startActivity(intent);
     }
 
     private class CrimeAdapter extends ArrayAdapter<Crime> {
@@ -68,4 +70,10 @@ public class CrimeListFragment extends ListFragment {
 
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        ((CrimeAdapter)getListAdapter()).notifyDataSetChanged();
+    }
 }
