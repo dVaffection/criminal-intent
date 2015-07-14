@@ -1,11 +1,11 @@
 package com.dvlab.criminalintent;
 
-import android.app.Activity;
-import android.app.Fragment;
-import android.app.FragmentManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 
-abstract public class SingleFragmentActivity extends Activity {
+abstract public class SingleFragmentActivity extends FragmentActivity {
 
     protected abstract Fragment createFragment();
 
@@ -14,7 +14,7 @@ abstract public class SingleFragmentActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fragment);
 
-        FragmentManager fm = getFragmentManager();
+        FragmentManager fm = getSupportFragmentManager();
         Fragment fragment = fm.findFragmentById(R.id.fragment_container);
 
         if (fragment == null) {

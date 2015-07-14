@@ -6,4 +6,7 @@
     <string name="crime_solved_label">Solved?</string>
     <string name="crime_list_title_label">Crime list</string>
     <string name="action_settings">Settings</string>
+    <string name="title_activity_crime_pager">CrimePagerActivity</string>
+
+    <string name="hello_world">Hello world!</string>
 </resources>

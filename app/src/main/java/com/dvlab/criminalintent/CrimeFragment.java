@@ -1,7 +1,7 @@
 package com.dvlab.criminalintent;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -25,6 +25,12 @@ public class CrimeFragment extends Fragment {
     private CheckBox solvedCheckbox;
 
     public CrimeFragment() {
+    }
+
+    public Bundle createArgs(UUID crimeId) {
+        Bundle args = new Bundle();
+        args.putSerializable(EXTRA_CRIME_ID, crimeId);
+        return args;
     }
 
     @Override
