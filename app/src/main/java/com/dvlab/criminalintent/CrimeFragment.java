@@ -1,7 +1,10 @@
 package com.dvlab.criminalintent;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -13,11 +16,14 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 
+import java.util.Date;
 import java.util.UUID;
 
 public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "com.dvlab.criminalintent.crime_id";
+    public static final String DIALOG_DATE = "date";
+    public static final int REQUEST_DATE = 0;
 
     private Crime crime;
     private EditText crimeTitle;
@@ -68,7 +74,17 @@ public class CrimeFragment extends Fragment {
         String dateFormatted = DateFormat.format("EEEE, MMMM dd, yyyy", crime.getDate()).toString();
         dateButton = (Button) view.findViewById(R.id.crime_date);
         dateButton.setText(dateFormatted);
-        dateButton.setEnabled(false);
+        dateButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                DatePickerFragment dialog = new DatePickerFragment();
+                Bundle args = dialog.createArgs(crime.getDate());
+                dialog.setArguments(args);
+                dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+                dialog.show(fm, DIALOG_DATE);
+            }
+        });
 
         solvedCheckbox = (CheckBox) view.findViewById(R.id.crime_solved);
         solvedCheckbox.setChecked(crime.isSolved());
@@ -82,4 +98,15 @@ public class CrimeFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) return;
+
+        if (requestCode == REQUEST_DATE) {
+            Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+            crime.setDate(date);
+            String dateFormatted = DateFormat.format("EEEE, MMMM dd, yyyy", date).toString();
+            dateButton.setText(dateFormatted);
+        }
+    }
 }
