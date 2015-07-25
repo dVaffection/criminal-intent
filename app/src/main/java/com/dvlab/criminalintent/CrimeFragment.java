@@ -1,14 +1,18 @@
 package com.dvlab.criminalintent;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -43,6 +47,8 @@ public class CrimeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         UUID crimeId = (UUID) getArguments().getSerializable(EXTRA_CRIME_ID);
         crime = CrimeLab.getInstance(getActivity()).getCrime(crimeId);
     }
@@ -51,6 +57,15 @@ public class CrimeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+            if (NavUtils.getParentActivityName(getActivity()) != null) {
+                ActionBar actionBar = getActivity().getActionBar();
+                if (actionBar != null) {
+                    actionBar.setDisplayHomeAsUpEnabled(true);
+                }
+            }
+        }
 
         crimeTitle = (EditText) view.findViewById(R.id.crime_title);
         crimeTitle.setText(crime.getTitle());
@@ -107,6 +122,19 @@ public class CrimeFragment extends Fragment {
             crime.setDate(date);
             String dateFormatted = DateFormat.format("EEEE, MMMM dd, yyyy", date).toString();
             dateButton.setText(dateFormatted);
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home :
+                if (NavUtils.getParentActivityName(getActivity()) != null) {
+                    NavUtils.navigateUpFromSameTask(getActivity());
+                }
+                return true;
+            default :
+                return super.onOptionsItemSelected(item);
         }
     }
 }
