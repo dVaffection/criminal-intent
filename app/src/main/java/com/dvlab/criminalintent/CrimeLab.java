@@ -64,8 +64,37 @@ public class CrimeLab {
         return null;
     }
 
+    public Crime getCrime(int position) {
+        try {
+            return crimes.get(position);
+        } catch (IndexOutOfBoundsException e) {
+            return null;
+        }
+    }
+
     public void addCrime(Crime crime) {
         crimes.add(crime);
+    }
+
+    public void deleteCrime(Crime crime) {
+        crimes.remove(crime);
+    }
+
+    public void deleteCrime(UUID id) {
+        for (Crime crime : crimes) {
+            if (crime.getId().equals(id)) {
+                crimes.remove(crime);
+                break;
+            }
+        }
+    }
+
+    public void deleteCrime(int position) {
+        try {
+            crimes.remove(position);
+        } catch (IndexOutOfBoundsException e) {
+            // left empty intentionally
+        }
     }
 
     public boolean saveCrimes() {

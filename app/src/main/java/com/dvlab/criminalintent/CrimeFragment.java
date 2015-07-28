@@ -11,7 +11,10 @@ import android.support.v4.app.NavUtils;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,6 +27,8 @@ import java.util.Date;
 import java.util.UUID;
 
 public class CrimeFragment extends Fragment {
+
+    public static final String TAG = CrimeFragment.class.getSimpleName();
 
     public static final String EXTRA_CRIME_ID = "com.dvlab.criminalintent.crime_id";
     public static final String DIALOG_DATE = "date";
@@ -57,6 +62,7 @@ public class CrimeFragment extends Fragment {
     public void onPause() {
         super.onPause();
 
+        Log.i(TAG, "CrimeFragment.onPause");
         CrimeLab.getInstance(getActivity()).saveCrimes();
     }
 
@@ -65,6 +71,7 @@ public class CrimeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
+        // technically out app level is "Jelly Bean" (16) but let's keep it for reference
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             if (NavUtils.getParentActivityName(getActivity()) != null) {
                 ActionBar actionBar = getActivity().getActionBar();
@@ -133,6 +140,13 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+
+        inflater.inflate(R.menu.fragment_crime, menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
@@ -140,8 +154,21 @@ public class CrimeFragment extends Fragment {
                     NavUtils.navigateUpFromSameTask(getActivity());
                 }
                 return true;
+
+            case R.id.menu_item_delete_crime:
+                UUID crimeId = (UUID) getArguments().getSerializable(EXTRA_CRIME_ID);
+                CrimeLab.getInstance(getActivity()).deleteCrime(crimeId);
+
+                if (NavUtils.getParentActivityName(getActivity()) != null) {
+                    NavUtils.navigateUpFromSameTask(getActivity());
+                }
+
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 }
