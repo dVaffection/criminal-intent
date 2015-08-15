@@ -17,8 +17,8 @@ public class CrimeCameraActivity extends SingleFragmentActivity {
     protected void onCreate(Bundle savedInstanceState) {
         // Hide the window title.
         // neither works :(
-//        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
-        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+//        requestWindowFeature(Window.FEATURE_NO_TITLE);
         // Hide the status bar and other OS-level chrome
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 

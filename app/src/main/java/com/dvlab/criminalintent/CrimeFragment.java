@@ -4,6 +4,7 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.BitmapDrawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,6 +26,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import java.util.Date;
 import java.util.UUID;
@@ -35,13 +37,18 @@ public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "com.dvlab.criminalintent.crime_id";
     public static final String DIALOG_DATE = "date";
+    private static final String DIALOG_IMAGE = "image";
+
+
     public static final int REQUEST_DATE = 0;
+    public static final int REQUEST_PHOTO = 1;
 
     private Crime crime;
     private EditText crimeTitle;
     private Button dateButton;
     private CheckBox solvedCheckbox;
     private ImageButton photoButton;
+    private ImageView photoView;
 
     public CrimeFragment() {
     }
@@ -63,6 +70,13 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        showPhoto();
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
 
@@ -71,11 +85,18 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+
+        PictureUtils.cleanImageView(photoView);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
 
-        // technically out app level is "Jelly Bean" (16) but let's keep it for reference
+        // technically our app level is "Jelly Bean" (16) but let's keep it for reference
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             if (NavUtils.getParentActivityName(getActivity()) != null) {
                 ActionBar actionBar = getActivity().getActionBar();
@@ -133,7 +154,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), CrimeCameraActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_PHOTO);
             }
         });
 
@@ -147,6 +168,20 @@ public class CrimeFragment extends Fragment {
             photoButton.setEnabled(false);
         }
 
+        photoView = (ImageView) view.findViewById(R.id.crime_image_view);
+        photoView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Photo p = crime.getPhoto();
+                if (p == null)
+                    return;
+
+                FragmentManager fm = getActivity().getSupportFragmentManager();
+                String path = getActivity().getFileStreamPath(p.getFilename()).getAbsolutePath();
+                ImageFragment.newInstance(path).show(fm, DIALOG_IMAGE);
+            }
+        });
+
         return view;
     }
 
@@ -159,6 +194,14 @@ public class CrimeFragment extends Fragment {
             crime.setDate(date);
             String dateFormatted = DateFormat.format("EEEE, MMMM dd, yyyy", date).toString();
             dateButton.setText(dateFormatted);
+        } else if (requestCode == REQUEST_PHOTO) {
+            // Create a new Photo object and attach it to the crime
+            String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
+            if (filename != null) {
+                Photo p = new Photo(filename);
+                crime.setPhoto(p);
+                showPhoto();
+            }
         }
     }
 
@@ -191,6 +234,18 @@ public class CrimeFragment extends Fragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void showPhoto() {
+        // (Re)set the image button's image based on our photo
+        Photo p = crime.getPhoto();
+        BitmapDrawable b = null;
+        if (p != null) {
+            String path = getActivity().getFileStreamPath(p.getFilename()).getAbsolutePath();
+            b = PictureUtils.getScaledDrawable(getActivity(), path);
+        }
+
+        photoView.setImageDrawable(b);
     }
 
 
