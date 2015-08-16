@@ -198,6 +198,12 @@ public class CrimeFragment extends Fragment {
             // Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
             if (filename != null) {
+                // delete an old one
+                Photo oldPhoto = crime.getPhoto();
+                if (oldPhoto != null) {
+                    oldPhoto.delete();
+                }
+
                 Photo p = new Photo(filename);
                 crime.setPhoto(p);
                 showPhoto();

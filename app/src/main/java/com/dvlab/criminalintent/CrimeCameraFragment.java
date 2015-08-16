@@ -46,19 +46,19 @@ public class CrimeCameraFragment extends Fragment {
             // Create a filename
             String filename = UUID.randomUUID().toString() + ".jpg";
             // Save the jpeg data to disk
-            FileOutputStream os = null;
+            FileOutputStream outputStream = null;
             boolean success = true;
 
             try {
-                os = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
-                os.write(data);
+                outputStream = getActivity().openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.write(data);
             } catch (Exception e) {
                 Log.e(TAG, "Error writing to file " + filename, e);
                 success = false;
             } finally {
                 try {
-                    if (os != null)
-                        os.close();
+                    if (outputStream != null)
+                        outputStream.close();
                 } catch (Exception e) {
                     Log.e(TAG, "Error closing file " + filename, e);
                     success = false;
