@@ -65,7 +65,7 @@ public class CrimeListFragment extends ListFragment {
         // otherwise context menu won't appear
         ListView listView = (ListView) view.findViewById(android.R.id.list);
 
-        // technically out app level is "Jelly Bean" (16) but let's keep it for reference
+        // technically our app level is "Jelly Bean" (16) but let's keep it for reference
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
             // use olf floating context menu
             registerForContextMenu(listView);

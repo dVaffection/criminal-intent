@@ -15,6 +15,7 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -181,6 +182,7 @@ public class CrimeFragment extends Fragment {
                 ImageFragment.newInstance(path).show(fm, DIALOG_IMAGE);
             }
         });
+        registerForContextMenu(photoView);
 
         return view;
     }
@@ -198,12 +200,6 @@ public class CrimeFragment extends Fragment {
             // Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
             if (filename != null) {
-                // delete an old one
-                Photo oldPhoto = crime.getPhoto();
-                if (oldPhoto != null) {
-                    oldPhoto.delete();
-                }
-
                 Photo p = new Photo(filename);
                 crime.setPhoto(p);
                 showPhoto();
@@ -239,6 +235,28 @@ public class CrimeFragment extends Fragment {
 
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        // inflate context menu and consider attaching it to the list `onCreateView`
+        // but better use `MultiChoiceModeListener`
+        getActivity().getMenuInflater().inflate(R.menu.crime_context, menu);
+
+        super.onCreateContextMenu(menu, v, menuInfo);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_photo:
+                PictureUtils.cleanImageView(photoView);
+                crime.setPhoto(null);
+
+                return true;
+            default:
+                return super.onContextItemSelected(item);
         }
     }
 

@@ -64,6 +64,10 @@ public class Crime {
     }
 
     public void setPhoto(Photo photo) {
+        if (this.photo != null) {
+            this.photo.delete();
+        }
+
         this.photo = photo;
     }
 
