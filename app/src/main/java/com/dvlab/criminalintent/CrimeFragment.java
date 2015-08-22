@@ -58,6 +58,7 @@ public class CrimeFragment extends Fragment {
     private ImageButton photoButton;
     private ImageView photoView;
     private Button suspectButton;
+    private Button callSuspectButton;
 
     public CrimeFragment() {
     }
@@ -228,6 +229,24 @@ public class CrimeFragment extends Fragment {
             suspectButton.setText(crime.getSuspect());
         }
 
+        callSuspectButton = (Button) view.findViewById(R.id.crime_call_suspect_button);
+        if (crime.getSuspectNumber() != null) {
+            callSuspectButton.setEnabled(true);
+        }
+        callSuspectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (crime.getSuspectNumber() != null) {
+                    Uri number = Uri.parse("tel:" + crime.getSuspectNumber());
+                    Intent intent = new Intent(Intent.ACTION_DIAL);
+                    intent.setData(number);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getActivity(), "Suspect doesn't have a number", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
         return view;
     }
 
@@ -249,23 +268,60 @@ public class CrimeFragment extends Fragment {
                 showPhoto();
             }
         } else if (requestCode == REQUEST_CONTACT) {
-            Uri contactUri = data.getData();
-            // Specify which fields you want your query to return values for.
-            String[] queryFields = new String[]{ContactsContract.Contacts.DISPLAY_NAME};
+            String[] queryFields;
+            Uri uri;
+            Cursor cursor;
+
+            uri = data.getData();
+            queryFields = new String[]{ContactsContract.Contacts.DISPLAY_NAME};
+            cursor = getActivity().getContentResolver().query(uri, queryFields, null, null, null);
+            if (cursor.getCount() == 0) {
+                cursor.close();
+                return;
+            }
+
+            cursor.moveToFirst();
+            String suspectName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+            crime.setSuspect(suspectName);
+            suspectButton.setText(suspectName);
+
+
+            uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
+            queryFields = new String[]{
+                    ContactsContract.Contacts.DISPLAY_NAME,
+                    ContactsContract.CommonDataKinds.Phone.NUMBER
+            };
+
             // Perform your query - the contactUri is like a "where" clause here
-            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+            cursor = getActivity().getContentResolver().query(uri, queryFields, null, null, null);
             // Double-check that you actually got results
-            if (c.getCount() == 0) {
-                c.close();
+            if (cursor.getCount() == 0) {
+                cursor.close();
                 return;
             }
             // Pull out the first column of the first row of data -
             // that is your suspect's name.
-            c.moveToFirst();
-            String suspect = c.getString(0);
-            crime.setSuspect(suspect);
-            suspectButton.setText(suspect);
-            c.close();
+            cursor.moveToFirst();
+
+            int indexName = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME);
+            int indexNumber = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+
+            do {
+                suspectName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+
+                // if there is no phone number it doesn't work :(
+                // gotta check for it first
+                if (suspectName.equals(crime.getSuspect())) {
+                    String suspectNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                    crime.setSuspectNumber(suspectNumber);
+                    callSuspectButton.setEnabled(true);
+
+                    break;
+                }
+            } while (cursor.moveToNext());
+
+            cursor.close();
         }
     }
 

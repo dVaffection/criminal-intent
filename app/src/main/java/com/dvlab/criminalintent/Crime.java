@@ -14,6 +14,7 @@ public class Crime {
     private boolean isSolved;
     private Photo photo;
     private String suspect;
+    private String suspectNumber;
 
     public Crime() {
         id = UUID.randomUUID();
@@ -32,6 +33,9 @@ public class Crime {
         }
         if (jsonObject.has("suspect")) {
             suspect = jsonObject.getString("suspect");
+        }
+        if (jsonObject.has("suspect_number")) {
+            suspectNumber = jsonObject.getString("suspect_number");
         }
     }
 
@@ -83,6 +87,14 @@ public class Crime {
         this.suspect = suspect;
     }
 
+    public String getSuspectNumber() {
+        return suspectNumber;
+    }
+
+    public void setSuspectNumber(String suspectNumber) {
+        this.suspectNumber = suspectNumber;
+    }
+
     @Override
     public String toString() {
         return title;
@@ -96,6 +108,7 @@ public class Crime {
         json.put("date", date.getTime());
         json.put("is_solved", isSolved);
         json.put("suspect", suspect);
+        json.put("suspect_number", suspectNumber);
         if (photo != null) {
             json.put("photo", photo.toJSON());
         }
