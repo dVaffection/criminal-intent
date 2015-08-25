@@ -51,6 +51,8 @@ public class CrimeFragment extends Fragment {
     public static final int REQUEST_PHOTO = 1;
     public static final int REQUEST_CONTACT = 2;
 
+
+    private Callbacks callbacks;
     private Crime crime;
     private EditText crimeTitle;
     private Button dateButton;
@@ -102,6 +104,20 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        callbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+
+        callbacks = null;
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_crime, container, false);
@@ -127,6 +143,9 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 crime.setTitle(s.toString());
+                getActivity().setTitle(crime.getTitle());
+
+                callbacks.onCrimeUpdated(crime);
             }
 
             @Override
@@ -156,6 +175,8 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 crime.setIsSolved(isChecked);
+
+                callbacks.onCrimeUpdated(crime);
             }
         });
 
@@ -259,6 +280,8 @@ public class CrimeFragment extends Fragment {
             crime.setDate(date);
             String dateFormatted = DateFormat.format("EEEE, MMMM dd, yyyy", date).toString();
             dateButton.setText(dateFormatted);
+
+            callbacks.onCrimeUpdated(crime);
         } else if (requestCode == REQUEST_PHOTO) {
             // Create a new Photo object and attach it to the crime
             String filename = data.getStringExtra(CrimeCameraFragment.EXTRA_PHOTO_FILENAME);
@@ -267,6 +290,8 @@ public class CrimeFragment extends Fragment {
                 crime.setPhoto(p);
                 showPhoto();
             }
+
+            callbacks.onCrimeUpdated(crime);
         } else if (requestCode == REQUEST_CONTACT) {
             String[] queryFields;
             Uri uri;
@@ -307,12 +332,12 @@ public class CrimeFragment extends Fragment {
             int indexNumber = cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
 
             do {
-                suspectName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                suspectName = cursor.getString(indexName);
 
                 // if there is no phone number it doesn't work :(
                 // gotta check for it first
                 if (suspectName.equals(crime.getSuspect())) {
-                    String suspectNumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                    String suspectNumber = cursor.getString(indexNumber);
 
                     crime.setSuspectNumber(suspectNumber);
                     callSuspectButton.setEnabled(true);
@@ -322,6 +347,9 @@ public class CrimeFragment extends Fragment {
             } while (cursor.moveToNext());
 
             cursor.close();
+
+
+            callbacks.onCrimeUpdated(crime);
         }
     }
 
@@ -344,6 +372,8 @@ public class CrimeFragment extends Fragment {
             case R.id.menu_item_delete_crime:
                 UUID crimeId = (UUID) getArguments().getSerializable(EXTRA_CRIME_ID);
                 CrimeLab.getInstance(getActivity()).deleteCrime(crimeId);
+
+                callbacks.onCrimeDeleted();
 
                 if (NavUtils.getParentActivityName(getActivity()) != null) {
                     NavUtils.navigateUpFromSameTask(getActivity());
@@ -414,6 +444,11 @@ public class CrimeFragment extends Fragment {
         PackageManager pm = getActivity().getPackageManager();
         List<ResolveInfo> activities = pm.queryIntentActivities(intent, 0);
         return activities.size() > 0;
+    }
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+        void onCrimeDeleted();
     }
 
 

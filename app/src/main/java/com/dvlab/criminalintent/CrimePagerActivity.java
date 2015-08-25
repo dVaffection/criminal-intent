@@ -12,10 +12,20 @@ import android.view.ViewGroup;
 import java.util.List;
 import java.util.UUID;
 
-public class CrimePagerActivity extends ActionBarActivity {
+public class CrimePagerActivity extends ActionBarActivity implements CrimeFragment.Callbacks {
 
     private ViewPager viewPager;
     private List<Crime> crimes;
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
+    }
+
+    @Override
+    public void onCrimeDeleted() {
+
+    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
